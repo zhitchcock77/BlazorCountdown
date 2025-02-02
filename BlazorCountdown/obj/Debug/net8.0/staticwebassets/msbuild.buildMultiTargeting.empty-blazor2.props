@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\empty-blazor2.props" />
+</Project>

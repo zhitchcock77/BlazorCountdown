@@ -1,0 +1,60 @@
+@page "/"
+@using BlazorCountdown.Models
+@inject NavigationManager NavigationManager
+
+<div class="main-menu">
+    <div class="menu-content">
+        <h1>Countdown Letters Game</h1>
+        <div class="menu-buttons">
+            <button class="btn btn-primary btn-lg" @onclick="StartGame">Play Game</button>
+            <button class="btn btn-secondary btn-lg" @onclick="ToggleInstructions">
+                @(showInstructions ? "Hide Instructions" : "Show Instructions")
+            </button>
+        </div>
+
+        @if (showInstructions)
+        {
+            <div class="instructions">
+                <h2>How to Play</h2>
+                <div class="instruction-content">
+                    <h3>Game Rules:</h3>
+                    <ul>
+                        <li>Each round, select 9 letters by choosing vowels or consonants.</li>
+                        <li>You must select at least @GameConstants.MinVowels vowels and @GameConstants.MinConsonants consonants.</li>
+                        <li>After selecting letters, make the longest word possible within @GameConstants.RoundTimeLimit seconds.</li>
+                        <li>Score points based on word length - 9-letter words score double!</li>
+                        <li>Play @GameConstants.TotalRounds rounds to achieve the highest total score.</li>
+                    </ul>
+
+                    <h3>Scoring:</h3>
+                    <ul>
+                        <li>Points equal to word length (e.g., "CAT" = 3 points)</li>
+                        <li>Nine-letter words score double points</li>
+                        <li>Invalid words score zero points</li>
+                    </ul>
+
+                    <h3>Tips:</h3>
+                    <ul>
+                        <li>Balance vowels and consonants for better word options</li>
+                        <li>Watch the timer - submit before time runs out!</li>
+                        <li>Look for common prefixes and suffixes</li>
+                    </ul>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool showInstructions = false;
+
+    private void StartGame()
+    {
+        NavigationManager.NavigateTo("/game");
+    }
+
+    private void ToggleInstructions()
+    {
+        showInstructions = !showInstructions;
+    }
+} 

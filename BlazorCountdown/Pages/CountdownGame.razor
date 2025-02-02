@@ -1,0 +1,418 @@
+@page "/game"
+@using BlazorCountdown.Interfaces
+@using BlazorCountdown.Models
+@using BlazorCountdown.Services
+@using Microsoft.AspNetCore.Components.Web
+@inject IGameService GameService
+@inject ILetterProvider LetterProvider
+@inject IAudioService AudioService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Countdown - Game</PageTitle>
+
+<div class="game-container" @onkeydown="HandleGlobalKeyPress" tabindex="0" @ref="gameContainer">
+    <div class="game-header">
+        <button class="btn btn-outline-secondary" @onclick="NavigateToMenu">
+            <span class="oi oi-home"></span> Menu
+        </button>
+        @if (gameStarted)
+        {
+            <h2>Round @GameService.CurrentRound of @GameConstants.TotalRounds</h2>
+            <div class="score">Total Score: @GameService.TotalScore</div>
+            @if (currentState?.RemainingTime > 0)
+            {
+                <div class="timer @(currentState.RemainingTime <= 5 ? "timer-warning" : "")">
+                    @currentState.RemainingTime seconds
+                </div>
+            }
+        }
+    </div>
+
+    @if (!gameStarted)
+    {
+        <div class="start-screen">
+            <h1>Ready to Play?</h1>
+            <p>Make the longest words possible using the letters you select.</p>
+            <div class="keyboard-shortcuts">
+                <h3>Keyboard Shortcuts:</h3>
+                <ul>
+                    <li><kbd>C</kbd> - Select Consonant</li>
+                    <li><kbd>V</kbd> - Select Vowel</li>
+                    <li><kbd>Enter</kbd> - Submit Word</li>
+                </ul>
+            </div>
+            <button class="btn btn-primary btn-lg" @onclick="StartNewGame">Start Game</button>
+        </div>
+    }
+    else
+    {
+        <div class="game-board">
+            <div class="selected-letters @(currentState?.IsWordFormationPhase == true ? "word-formation" : "")">
+                @foreach (var (letter, index) in GetLettersWithIndexes())
+                {
+                    <div class="letter-tile @(IsRecentlyAddedLetter(index) ? "just-added" : "")"
+                         @key="@($"letter_{index}")">
+                        @letter
+                    </div>
+                }
+                @for (int i = (currentState?.SelectedLetters?.Count ?? 0); i < GameConstants.TotalLettersPerRound; i++)
+                {
+                    <div class="letter-tile empty"></div>
+                }
+            </div>
+
+            @if (currentState?.IsLetterSelectionPhase == true)
+            {
+                <div class="letter-selection">
+                    <div class="selection-info">
+                        <p>Select @GameConstants.TotalLettersPerRound letters</p>
+                        <p>Min vowels: @GameConstants.MinVowels | Min consonants: @GameConstants.MinConsonants</p>
+                    </div>
+                    <div class="selection-buttons">
+                        <button class="btn btn-primary @(!CanSelectConsonant ? "disabled" : "")" 
+                                @onclick="RequestConsonant" 
+                                disabled="@(!CanSelectConsonant)">
+                            Consonant (@currentState.RemainingConsonantSelections) <kbd>C</kbd>
+                        </button>
+                        <button class="btn btn-primary @(!CanSelectVowel ? "disabled" : "")" 
+                                @onclick="RequestVowel" 
+                                disabled="@(!CanSelectVowel)">
+                            Vowel (@currentState.RemainingVowelSelections) <kbd>V</kbd>
+                        </button>
+                    </div>
+                </div>
+            }
+
+            @if (currentState?.IsWordFormationPhase == true)
+            {
+                <div class="word-submission">
+                    <input @bind="submittedWord" 
+                           @bind:event="oninput"
+                           @onkeydown="@(e => HandleWordInputKeyPress(e))"
+                           @ref="wordInput"
+                           placeholder="Type your word here"
+                           class="form-control" />
+                    <button class="btn btn-success" 
+                            @onclick="SubmitWord"
+                            disabled="@(string.IsNullOrWhiteSpace(submittedWord))">
+                        Submit Word <kbd>Enter</kbd>
+                    </button>
+                </div>
+            }
+
+            @if (currentState?.IsRoundComplete == true)
+            {
+                <div class="round-summary">
+                    <h3>Round @GameService.CurrentRound Complete!</h3>
+                    <div class="round-results">
+                        <div class="result-item">
+                            <span class="label">Your word:</span>
+                            <span class="value">@currentState.SubmittedWord</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Score this round:</span>
+                            <span class="value">@currentState.CurrentRoundScore points</span>
+                        </div>
+                    </div>
+                    
+                    @if (currentState.LongestPossibleWords.Any())
+                    {
+                        <div class="longest-words">
+                            <h4>Longest possible words:</h4>
+                            <div class="word-list">
+                                @foreach (var word in currentState.LongestPossibleWords.Take(5))
+                                {
+                                    <span class="possible-word">@word</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (!GameService.IsGameComplete)
+                    {
+                        <button class="btn btn-primary btn-lg" @onclick="StartNextRound">
+                            Next Round
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="game-over">
+                            <h3>Game Complete!</h3>
+                            <div class="final-score">Final Score: @GameService.TotalScore</div>
+                            <div class="end-buttons">
+                                <button class="btn btn-primary btn-lg" @onclick="StartNewGame">
+                                    Play Again
+                                </button>
+                                <button class="btn btn-secondary btn-lg" @onclick="NavigateToMenu">
+                                    Main Menu
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool gameStarted = false;
+    private GameState? currentState;
+    private string submittedWord = "";
+    private System.Threading.Timer? timer;
+    private DateTime lastTickTime = DateTime.MinValue;
+    private ElementReference gameContainer;
+    private ElementReference wordInput;
+    private int? lastAddedLetterIndex;
+    private DateTime lastLetterAddedTime = DateTime.MinValue;
+
+    private bool CanSelectConsonant => 
+        currentState?.IsLetterSelectionPhase == true && 
+        currentState.RemainingConsonantSelections > 0 &&
+        currentState.SelectedLetters.Count < GameConstants.TotalLettersPerRound;
+
+    private bool CanSelectVowel => 
+        currentState?.IsLetterSelectionPhase == true && 
+        currentState.RemainingVowelSelections > 0 &&
+        currentState.SelectedLetters.Count < GameConstants.TotalLettersPerRound;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await UpdateGameState();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await FocusGameContainer();
+        }
+        
+        // Focus game container during letter selection phase
+        if (currentState?.IsLetterSelectionPhase == true)
+        {
+            await FocusGameContainer();
+        }
+        // Focus word input during word formation phase
+        else if (currentState?.IsWordFormationPhase == true)
+        {
+            await FocusWordInput();
+        }
+    }
+
+    private async Task FocusGameContainer()
+    {
+        try
+        {
+            await gameContainer.FocusAsync();
+        }
+        catch { /* Ignore focus errors */ }
+    }
+
+    private async Task FocusWordInput()
+    {
+        try
+        {
+            await wordInput.FocusAsync();
+        }
+        catch { /* Ignore focus errors */ }
+    }
+
+    private void NavigateToMenu()
+    {
+        StopTimer();
+        NavigationManager.NavigateTo("/");
+    }
+
+    private async Task StartNewGame()
+    {
+        await GameService.StartNewGameAsync();
+        gameStarted = true;
+        submittedWord = "";
+        await UpdateGameState();
+        await AudioService.PlayRoundStartSound();
+    }
+
+    private async Task RequestConsonant()
+    {
+        if (CanSelectConsonant)
+        {
+            var letter = await GameService.RequestConsonantAsync();
+            if (letter != '\0')
+            {
+                await AudioService.PlayLetterSelectSound();
+                await UpdateGameState();
+                
+                lastAddedLetterIndex = currentState?.SelectedLetters.Count - 1;
+                lastLetterAddedTime = DateTime.Now;
+                
+                if (currentState?.SelectedLetters.Count == GameConstants.TotalLettersPerRound)
+                {
+                    StartTimer();
+                }
+            }
+            else
+            {
+                await UpdateGameState();
+            }
+        }
+    }
+
+    private async Task RequestVowel()
+    {
+        if (CanSelectVowel)
+        {
+            var letter = await GameService.RequestVowelAsync();
+            if (letter != '\0')
+            {
+                await AudioService.PlayLetterSelectSound();
+                await UpdateGameState();
+                
+                lastAddedLetterIndex = currentState?.SelectedLetters.Count - 1;
+                lastLetterAddedTime = DateTime.Now;
+                
+                if (currentState?.SelectedLetters.Count == GameConstants.TotalLettersPerRound)
+                {
+                    StartTimer();
+                }
+            }
+            else
+            {
+                await UpdateGameState();
+            }
+        }
+    }
+
+    private async Task HandleGlobalKeyPress(KeyboardEventArgs e)
+    {
+        if (!gameStarted || currentState == null) return;
+
+        // Only handle letter selection shortcuts in letter selection phase
+        if (currentState.IsLetterSelectionPhase)
+        {
+            switch (e.Key.ToUpper())
+            {
+                case "C" when CanSelectConsonant:
+                    await RequestConsonant();
+                    break;
+                case "V" when CanSelectVowel:
+                    await RequestVowel();
+                    break;
+            }
+        }
+    }
+
+    private async Task HandleWordInputKeyPress(KeyboardEventArgs e)
+    {
+        // Only handle Enter key for word submission during word formation phase
+        if (currentState?.IsWordFormationPhase == true && 
+            e.Key == "Enter" && 
+            !string.IsNullOrWhiteSpace(submittedWord))
+        {
+            await SubmitWord();
+        }
+    }
+
+    private async Task SubmitWord()
+    {
+        if (!string.IsNullOrWhiteSpace(submittedWord))
+        {
+            var score = await GameService.SubmitWordAsync(submittedWord);
+            await AudioService.PlayWordSubmitSound(score > 0);
+            submittedWord = "";
+            await UpdateGameState();
+            StopTimer();
+
+            if (GameService.IsGameComplete)
+            {
+                await AudioService.PlayGameOverSound();
+            }
+        }
+    }
+
+    private async Task StartNextRound()
+    {
+        if (await GameService.StartNextRoundAsync())
+        {
+            await UpdateGameState();
+            await AudioService.PlayRoundStartSound();
+        }
+    }
+
+    private async Task UpdateGameState()
+    {
+        currentState = await GameService.GetGameStateAsync();
+        StateHasChanged();
+    }
+
+    private void StartTimer()
+    {
+        StopTimer();
+        lastTickTime = DateTime.Now;
+        timer = new System.Threading.Timer(async _ =>
+        {
+            if (currentState?.RemainingTime > 0 && !currentState.IsRoundComplete)
+            {
+                currentState.RemainingTime--;
+                
+                // Play tick sound every second in the last 5 seconds
+                if (currentState.RemainingTime <= 5)
+                {
+                    await AudioService.PlayTimerTickSound();
+                }
+                
+                if (currentState.RemainingTime <= 0)
+                {
+                    await InvokeAsync(async () =>
+                    {
+                        // End the round when time runs out
+                        if (!string.IsNullOrWhiteSpace(submittedWord))
+                        {
+                            await SubmitWord();
+                        }
+                        else
+                        {
+                            await GameService.SubmitWordAsync("");
+                            await AudioService.PlayWordSubmitSound(false);
+                            await UpdateGameState();
+                            StopTimer();
+
+                            if (GameService.IsGameComplete)
+                            {
+                                await AudioService.PlayGameOverSound();
+                            }
+                        }
+                    });
+                }
+                await InvokeAsync(StateHasChanged);
+            }
+        }, null, 0, 1000);
+    }
+
+    private void StopTimer()
+    {
+        if (timer != null)
+        {
+            timer.Dispose();
+            timer = null;
+        }
+    }
+
+    public void Dispose()
+    {
+        StopTimer();
+    }
+
+    private IEnumerable<(char Letter, int Index)> GetLettersWithIndexes()
+    {
+        return currentState?.SelectedLetters?.Select((letter, index) => (letter, index)) ?? 
+               Enumerable.Empty<(char, int)>();
+    }
+
+    private bool IsRecentlyAddedLetter(int index)
+    {
+        return lastAddedLetterIndex == index && 
+               (DateTime.Now - lastLetterAddedTime).TotalSeconds <= 1;
+    }
+} 

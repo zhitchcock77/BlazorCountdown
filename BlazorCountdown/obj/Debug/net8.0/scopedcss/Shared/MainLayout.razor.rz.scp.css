@@ -1,0 +1,28 @@
+.page[b-oqvvajf4bg] {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+main[b-oqvvajf4bg] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.content[b-oqvvajf4bg] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+@media (min-width: 641px) {
+    .content[b-oqvvajf4bg] {
+        padding: 2rem;
+    }
+}
