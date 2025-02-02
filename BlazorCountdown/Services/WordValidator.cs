@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Threading;
+using System.IO;
+using System.Text.Json;
 
 namespace BlazorCountdown.Services
 {
@@ -13,6 +15,7 @@ namespace BlazorCountdown.Services
     {
         private readonly ILogger<WordValidator> _logger;
         private HashSet<string>? _dictionary;
+        private Dictionary<int, HashSet<string>>? _wordsByLength;
         private readonly HttpClient _httpClient;
         private readonly SemaphoreSlim _initializationLock = new(1, 1);
 
@@ -22,7 +25,7 @@ namespace BlazorCountdown.Services
             _httpClient = httpClient;
         }
 
-        private async Task EnsureDictionaryInitialized()
+        public async Task EnsureDictionaryInitialized()
         {
             if (_dictionary != null) return;
 
@@ -31,6 +34,7 @@ namespace BlazorCountdown.Services
             {
                 if (_dictionary != null) return;
                 _dictionary = await LoadDictionaryAsync();
+                _logger.LogInformation("Dictionary initialized with {Count} words", _dictionary.Count);
             }
             finally
             {
@@ -102,103 +106,85 @@ namespace BlazorCountdown.Services
 
             _logger.LogInformation("Finding longest possible words for letters: {Letters}", letters);
 
-            var results = new List<string>();
-            var maxLength = 0;
-
-            foreach (var word in _dictionary!)
+            // Create letter frequency map once
+            var letterCounts = new Dictionary<char, int>();
+            foreach (var letter in letters.ToUpperInvariant())
             {
-                if (await ValidateWordAsync(word, letters))
+                if (!letterCounts.ContainsKey(letter))
+                    letterCounts[letter] = 0;
+                letterCounts[letter]++;
+            }
+
+            var results = new List<string>();
+            
+            // Start from the longest possible length (9) and work backwards
+            for (int length = GameConstants.TotalLettersPerRound; length >= 3; length--)
+            {
+                if (_wordsByLength!.TryGetValue(length, out var wordsOfLength))
                 {
-                    if (word.Length > maxLength)
+                    foreach (var word in wordsOfLength)
                     {
-                        maxLength = word.Length;
-                        results.Clear();
-                        results.Add(word);
+                        if (CanFormWord(word, new Dictionary<char, int>(letterCounts)))
+                        {
+                            results.Add(word);
+                        }
                     }
-                    else if (word.Length == maxLength)
-                    {
-                        results.Add(word);
-                    }
+
+                    // If we found any words of this length, we're done
+                    if (results.Count > 0)
+                        break;
                 }
             }
 
-            _logger.LogInformation("Found {Count} words of length {Length}", results.Count, maxLength);
+            _logger.LogInformation("Found {Count} words of length {Length}", 
+                results.Count, 
+                results.Any() ? results[0].Length : 0);
+                
             return results.ToArray();
+        }
+
+        private bool CanFormWord(string word, Dictionary<char, int> availableLetters)
+        {
+            foreach (var letter in word)
+            {
+                if (!availableLetters.ContainsKey(letter) || availableLetters[letter] == 0)
+                    return false;
+                availableLetters[letter]--;
+            }
+            return true;
         }
 
         private async Task<HashSet<string>> LoadDictionaryAsync()
         {
-            try
+            _logger.LogInformation("Loading optimized dictionary...");
+            var dictionary = new HashSet<string>();
+            _wordsByLength = new Dictionary<int, HashSet<string>>();
+
+            var optimizedResponse = await _httpClient.GetStringAsync("optimized_dictionary.json");
+            var loadedDictionary = JsonSerializer.Deserialize<Dictionary<string, HashSet<string>>>(optimizedResponse);
+            
+            if (loadedDictionary == null)
             {
-                var dictionary = new HashSet<string>();
-                var response = await _httpClient.GetStringAsync("dictionary.txt");
-                var lines = response.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var line in lines)
-                {
-                    var word = line.Trim().ToUpperInvariant();
-                    
-                    // Only add words that:
-                    // 1. Are between 3 and 9 letters long
-                    // 2. Contain only letters (no numbers, hyphens, etc.)
-                    // 3. Don't contain repeated letters more than what's available in the game
-                    // 4. Are not proper nouns (don't start with uppercase in original)
-                    if (word.Length >= 3 && 
-                        word.Length <= GameConstants.TotalLettersPerRound && 
-                        Regex.IsMatch(word, "^[A-Z]+$") &&
-                        !HasTooManyRepeatedLetters(word) &&
-                        char.IsLower(line.Trim()[0]))
-                    {
-                        dictionary.Add(word);
-                    }
-                }
-
-                _logger.LogInformation("Loaded {Count} words from dictionary file", dictionary.Count);
-                return dictionary;
+                throw new InvalidOperationException("Failed to deserialize optimized dictionary");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading dictionary file");
-                return LoadFallbackDictionary();
-            }
-        }
 
-        private HashSet<string> LoadFallbackDictionary()
-        {
-            _logger.LogWarning("Using fallback dictionary");
-            return new HashSet<string>
+            _logger.LogInformation("Loading from optimized dictionary file");
+            foreach (var kvp in loadedDictionary)
             {
-                "CAT", "DOG", "BATH", "HOUSE", "COMPUTER",
-                "THE", "AND", "THAT", "HAVE", "FOR",
-                "NOT", "WITH", "YOU", "THIS", "BUT",
-                "HIS", "FROM", "THEY", "SAY", "HER",
-                "SHE", "WILL", "ONE", "ALL", "WOULD",
-                "THERE", "THEIR", "WHAT", "OUT", "ABOUT",
-                "WHO", "GET", "WHICH", "WHEN", "MAKE",
-                "CAN", "LIKE", "TIME", "JUST", "HIM",
-                "KNOW", "TAKE", "PEOPLE", "INTO", "YEAR",
-                "YOUR", "GOOD", "SOME", "COULD", "THEM"
-            };
-        }
-
-        private bool HasTooManyRepeatedLetters(string word)
-        {
-            var letterCounts = new Dictionary<char, int>();
-            foreach (var letter in word)
-            {
-                if (!letterCounts.ContainsKey(letter))
+                if (int.TryParse(kvp.Key, out int length))
                 {
-                    letterCounts[letter] = 0;
-                }
-                letterCounts[letter]++;
-
-                // If any letter appears more than 2 times, it's unlikely to be useful in the game
-                if (letterCounts[letter] > 2)
-                {
-                    return true;
+                    _wordsByLength[length] = kvp.Value;
+                    dictionary.UnionWith(kvp.Value);
                 }
             }
-            return false;
+
+            _logger.LogInformation("Dictionary loaded. Total words: {Count}", dictionary.Count);
+            foreach (var bucket in _wordsByLength)
+            {
+                _logger.LogInformation("{Length}-letter words: {Count}", bucket.Key, bucket.Value.Count);
+            }
+
+            return dictionary;
         }
     }
 } 

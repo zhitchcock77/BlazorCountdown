@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BlazorCountdown")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+142c315131d1f41bd0742ccf3818c363a5a67514")]
 [assembly: System.Reflection.AssemblyProductAttribute("BlazorCountdown")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BlazorCountdown")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

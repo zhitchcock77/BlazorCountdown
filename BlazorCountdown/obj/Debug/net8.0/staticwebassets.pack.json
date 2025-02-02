@@ -1,52 +1,68 @@
 {
   "Files": [
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\bin\\Debug\\net8.0\\wwwroot\\_framework\\blazor.webassembly.js",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\bin\\Debug\\net8.0\\wwwroot\\_framework\\blazor.webassembly.js",
       "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\obj\\Debug\\net8.0\\compressed\\7e9ruxxxo8.gz",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\obj\\Debug\\net8.0\\compressed\\7e9ruxxxo8.gz",
       "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js.gz"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\obj\\Debug\\net8.0\\scopedcss\\bundle\\BlazorCountdown.styles.css",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\obj\\Debug\\net8.0\\scopedcss\\bundle\\BlazorCountdown.styles.css",
       "PackagePath": "staticwebassets\\BlazorCountdown.styles.css"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\wwwroot\\css\\app.css",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\css\\app.css",
       "PackagePath": "staticwebassets\\css\\app.css"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\wwwroot\\css\\bootstrap\\bootstrap.min.css",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\css\\bootstrap\\bootstrap.min.css",
       "PackagePath": "staticwebassets\\css\\bootstrap\\bootstrap.min.css"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\wwwroot\\css\\bootstrap\\bootstrap.min.css.map",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\css\\bootstrap\\bootstrap.min.css.map",
       "PackagePath": "staticwebassets\\css\\bootstrap\\bootstrap.min.css.map"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\wwwroot\\dictionary.txt",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\css\\loading.css",
+      "PackagePath": "staticwebassets\\css\\loading.css"
+    },
+    {
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\css\\open-iconic\\font\\css\\open-iconic-bootstrap.min.css",
+      "PackagePath": "staticwebassets\\css\\open-iconic\\font\\css\\open-iconic-bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\dictionary.txt",
       "PackagePath": "staticwebassets\\dictionary.txt"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\wwwroot\\favicon.png",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\favicon-new.svg",
+      "PackagePath": "staticwebassets\\favicon-new.svg"
+    },
+    {
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\favicon.png",
       "PackagePath": "staticwebassets\\favicon.png"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\wwwroot\\icon-192.png",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\icon-192.png",
       "PackagePath": "staticwebassets\\icon-192.png"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\wwwroot\\images\\countdown-logo.svg",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\images\\countdown-logo.svg",
       "PackagePath": "staticwebassets\\images\\countdown-logo.svg"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\wwwroot\\index.html",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\index.html",
       "PackagePath": "staticwebassets\\index.html"
     },
     {
-      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\wwwroot\\js\\audio.js",
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\js\\audio.js",
       "PackagePath": "staticwebassets\\js\\audio.js"
+    },
+    {
+      "Id": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\wwwroot\\optimized_dictionary.json",
+      "PackagePath": "staticwebassets\\optimized_dictionary.json"
     },
     {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.BlazorCountdown.Microsoft.AspNetCore.StaticWebAssets.props",

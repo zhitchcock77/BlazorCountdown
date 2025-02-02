@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "MXlcmykJuJIIJs5BXBCGxGWeDw9+Hmbwyf8m8DtQ/1b0YKI5ll6UYHxwAsZ9roMe55flitvdGVIMCre6w93/Fg==",
+  "dgSpecHash": "G3lGqP3JrnUYifHCvg8x6FdJHR4LWHzxsDKOuL7Tai6PMYm3OIOYX5B9okGJbGivdVDb0sG64kj0H0nR0TQD8w==",
   "success": true,
-  "projectFilePath": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\BlazorCountdown.csproj",
+  "projectFilePath": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\BlazorCountdown.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\zachh\\.nuget\\packages\\microsoft.aspnetcore.authorization\\8.0.6\\microsoft.aspnetcore.authorization.8.0.6.nupkg.sha512",
     "C:\\Users\\zachh\\.nuget\\packages\\microsoft.aspnetcore.components\\8.0.6\\microsoft.aspnetcore.components.8.0.6.nupkg.sha512",

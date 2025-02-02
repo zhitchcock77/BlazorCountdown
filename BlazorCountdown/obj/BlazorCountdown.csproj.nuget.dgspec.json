@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\BlazorCountdown.csproj": {}
+    "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\BlazorCountdown.csproj": {}
   },
   "projects": {
-    "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\BlazorCountdown.csproj": {
+    "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\BlazorCountdown.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\BlazorCountdown.csproj",
+        "projectUniqueName": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\BlazorCountdown.csproj",
         "projectName": "BlazorCountdown",
-        "projectPath": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\BlazorCountdown.csproj",
+        "projectPath": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\BlazorCountdown.csproj",
         "packagesPath": "C:\\Users\\zachh\\.nuget\\packages\\",
-        "outputPath": "C:\\Repos\\scratch\\BlazorCountdown\\blazorcountdown\\obj\\",
+        "outputPath": "C:\\Repos\\scratch\\BlazorCountdown\\BlazorCountdown\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

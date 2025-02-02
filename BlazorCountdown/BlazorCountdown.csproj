@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>BlazorCountdown</AssemblyName>
     <RootNamespace>BlazorCountdown</RootNamespace>
+     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>

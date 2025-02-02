@@ -45,6 +45,72 @@
     </div>
 </div>
 
+<style>
+    .main-menu {
+        display: block;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .menu-content {
+        width: 100%;
+        max-width: 800px;
+        background: white;
+        padding: 2rem;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin: 0 auto;
+    }
+
+    h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+    }
+
+    .menu-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .instructions {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .instruction-content {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .instruction-content h3 {
+        color: #2c3e50;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .instruction-content h3:first-child {
+        margin-top: 0;
+    }
+
+    .instruction-content ul {
+        padding-left: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .instruction-content li {
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+</style>
+
 @code {
     private bool showInstructions = false;
 

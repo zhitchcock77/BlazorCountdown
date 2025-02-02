@@ -5,6 +5,11 @@ namespace BlazorCountdown.Interfaces
     public interface IWordValidator
     {
         /// <summary>
+        /// Ensures the dictionary is initialized and optimized
+        /// </summary>
+        Task EnsureDictionaryInitialized();
+
+        /// <summary>
         /// Validates if a word can be formed from the given letters and exists in the dictionary
         /// </summary>
         /// <param name="word">The word to validate</param>
