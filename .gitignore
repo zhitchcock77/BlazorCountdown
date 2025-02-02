@@ -3,7 +3,6 @@
 **/obj/
 **/Debug/
 **/Release/
-**/wwwroot/optimized_dictionary.json
 
 ## Visual Studio files
 .vs/
